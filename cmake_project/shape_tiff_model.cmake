@@ -1,0 +1,1 @@
+lib/shape_tiff_model

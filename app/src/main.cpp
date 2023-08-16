@@ -36,12 +36,9 @@ int main()
     // get boundary box for tiff 
     ShapeTiffGridSettings st_model = sh.GetSettings();
     double max_weight = sh.GetMaxWeight();
-    // read tiff
-    //tiff_reader::TiffReader tiff = { Vertices,st_model };
+
     float max_angle_vert = 0.3;
     float max_angle_hor = 0.2;
-    //tiff.readModel(files_tiff,  max_angle_hor, max_angle_vert);
-    //vector<Relief> r = tiff.Get_Relief();
 
     int N = st_model.cellWidth;
     int M = st_model.cellHeight;
@@ -54,34 +51,17 @@ int main()
 
     // choose start and finish point
 
-    //Coord startPoint = {100, 0};
-    //Coord goalPoint = {100, M-1};
-
-    Coord startPoint = { 100, 0 };
-    Coord goalPoint = { startPoint.x + 1, M-1,0 };
+    Coord startPoint = { 100, M-1 };
+    Coord goalPoint = { startPoint.x, 0,0 };
     int max_deviation = 10;
     Coord routStart = startPoint;
     Coord routFinish = goalPoint;
     //make graph
-    //clock_t tStart = clock();
     Graph g = { Vertices, N, M, int(road_len * st_model.user_grid),int(move_step * st_model.user_grid), int(max_deviation * st_model.user_grid), 0, 0 };
-    //find shortest path 
     vector<Coord> path;
     double weight = INF;
     g.find_path_Dijkstra({ startPoint.x, startPoint.y }, goalPoint);
     path = g.find_path_Dijkstra({ startPoint.x, startPoint.y }, goalPoint);
-    //    double Label = g.GetLabel(goalPoint);
-    //    printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
-    //    double Route_Len = g.GetRouteLen();
-    //    vector<int> Categories = g.GetCategories();
-    //    cout << "Number of destroied trees:" << endl;
-    //    // for (int i = 0; i < Categories.size(); i++) {
-    //    cout << "Category: thgh < 10: " << Categories[0] << endl;
-    //    cout << "Category: 10 <= thgh < 20: " << Categories[1] << endl;
-    //    cout << "Category: 20 <= thgh < 30: " << Categories[2] << endl;
-    //    cout << "Category: 30 <= thgh: " << Categories[3] << endl;
-        // }
-         // write shortest path, trees and relief
     std::cout << M << std::endl;
     ofstream out;
     out.open("path.txt");
@@ -94,28 +74,16 @@ int main()
     out.open("vertex.txt");
     if (out.is_open()) {
         for (const auto& path_coord : path)
-            out << path_coord.x << ", " << path_coord.x + road_len << ", " << path_coord.y << ", " << g.GetLabel(path_coord) << endl;
+            out << path_coord.x << ", " << path_coord.x + road_len << ", " << path_coord.y  << endl;
     }
-
-    //  cout << "Current label: " << /*weight*/Label << endl;
-    //  cout << "Straight label: " << g.GetStraightLabel(startPoint, goalPoint) << endl;
-    //  cout << "Route Len: " << Route_Len << "; Start Point: {" << routStart.x << "," << routStart.y << "}; Goal Point : {" << routFinish.x << ", " << routFinish.y << "};" << endl;
     ofstream out_2;
     out_2.open("weights.txt");
     if (out_2.is_open()) {
         out_2 << "x, y, thck" << endl;
         for (const auto& t : sh.GetTrees())
             out_2 << t.x << ", " << t.y << ", " << t.thck << std::endl;
-           // out_2 << st_model.user_grid * t.x - st_model.user_grid * st_model.boundaryBox.xMin << ", " <</*M-1-*/ (st_model.user_grid * t.y - st_model.user_grid * st_model.boundaryBox.yMin) << ", " << t.thck << endl;
     }
-    //   vector<Relief> r = tiff.GetRelief();
-  //     ofstream out_3;
-  //     out_3.open("relief.txt");
-  //     if (out_3.is_open()) {
-  //         out_3 << "x, y, hght" << endl;
-  //         for (auto t : r)
-  //             out_3 << t.x  << ", " << t.y  << ", " << t.hght << endl;
-  //     }
+
 
     return 0;
 }

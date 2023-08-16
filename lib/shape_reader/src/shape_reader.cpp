@@ -22,15 +22,11 @@ namespace shape_reader
             }
             Tree tr;
             for (auto const& feature : shp) {
-                //std::cout << feature.getGeometry()->wkt() << "\n";
-                //auto geom = feature.getGeometry();
-
                 if (feature.getAttributes().contains("thck")) {
                     tr.thck = std::any_cast<double>(feature.getAttributes()["thck"]);
                 }
                 if (feature.getAttributes().contains("hght")) {
                     tr.thck = std::any_cast<double>(feature.getAttributes()["hght"]);
-                    //std::cout << tr.thck << std::endl;
                 }
                 auto p = dynamic_cast<shp::Point*>(feature.getGeometry());
                 tr.x = p->getX();
@@ -53,34 +49,12 @@ namespace shape_reader
         const int M = ceil(readSettings.user_grid * ceil((it_y.second->y - it_y.first->y)) + 1);
         readSettings = { M,N,{it_x.first->x,it_x.second->x,it_y.first->y,it_y.second->y} };
         Vertices.resize(N, std::vector<Vertex>(M));
-        // std::cout << N<<" "<<M<<std::endl;
         for (auto tr : trees) {
-             Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))), int(floor(readSettings.user_grid * (tr.y - it_y.first->y))) };
-             if(pos.x >=0 && pos.x < N && M-1-pos.y >=0 && M-1-pos.y < M ){
-             Vertices[pos.x][M-1-pos.y ].Weight = +GetWeight(tr.thck);
-             if (tr.thck > 40) Vertices[pos.x][M-1-pos.y].Categories[3] += 1;
-             else  Vertices[pos.x][M-1-pos.y].Categories[floor(tr.thck / 10)] += 1;
-             if (Vertices[pos.x][M-1-pos.y].Weight > max_weight) max_weight = Vertices[pos.x][M-1-pos.y].Weight;
-             }
-
-//            Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))), int(floor(readSettings.user_grid * (tr.y - it_y.first->y))) };
-//            // std::cout << pos.x<<" "<<pos.y<<std::endl;
-//            Vertices[pos.x][pos.y].Weight = +GetWeight(tr.thck);
-//            if (tr.thck > 40) Vertices[pos.x][pos.y].Categories[3] += 1;
-//            else  Vertices[pos.x][pos.y].Categories[floor(tr.thck / 10)] += 1;
-//            if (Vertices[pos.x][pos.y].Weight > max_weight) max_weight = Vertices[pos.x][pos.y].Weight;
-
-
-            // Coord min_coord = { floor(readSettings.user_grid *(tr.x - it_x.first->x - tr.thck/100)),floor(readSettings.user_grid * (tr.y - it_x.first->y - tr.thck/100)) };
-            // Coord max_coord = { floor(readSettings.user_grid * (tr.x - it_x.first->x + tr.thck/100)),floor(readSettings.user_grid * (tr.y - it_x.first->y + tr.thck/100)) };
-            // for (int i = min_coord.x; i <= max_coord.x; i++) {
-               // for (int j = min_coord.y; j <= max_coord.y; j++) {            
-                //     if (i >= 0 && j >= 0) {
-                //         Vertices[i][j].Weight = +GetWeight(tr.thck);
-                //        if (Vertices[i][j].Weight > max_weight) max_weight = Vertices[i][j].Weight;
-              //       }
-             //    }
-           // }
+            Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))), int(floor(readSettings.user_grid * (tr.y - it_y.first->y))) };
+            Vertices[pos.x][pos.y].Weight = +GetWeight(tr.thck);
+            if (tr.thck > 40) Vertices[pos.x][pos.y].Categories[3] += 1;
+            else  Vertices[pos.x][pos.y].Categories[floor(tr.thck / 10)] += 1;
+            if (Vertices[pos.x][pos.y].Weight > max_weight) max_weight = Vertices[pos.x][pos.y].Weight;
         }
         for (int i = 0; i < Vertices.size(); i++) {
             for (int j = 0; j < Vertices[0].size(); j++) {

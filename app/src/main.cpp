@@ -57,19 +57,19 @@ int main()
     //Coord startPoint = {100, 0};
     //Coord goalPoint = {100, M-1};
 
-    Coord startPoint = { 100, 0 };
-    Coord goalPoint = { startPoint.x + 1, M-1,0 };
+    Coord startPoint = { 500, 0, move_step };
+    Coord goalPoint = { startPoint.x, M-1 };
     int max_deviation = 10;
     Coord routStart = startPoint;
     Coord routFinish = goalPoint;
     //make graph
     //clock_t tStart = clock();
-    Graph g = { Vertices, N, M, int(road_len * st_model.user_grid),int(move_step * st_model.user_grid), int(max_deviation * st_model.user_grid), 0, 0 };
-    //find shortest path 
+    Graph g = { Vertices,startPoint, goalPoint, int(st_model.user_grid), M, int(road_len * st_model.user_grid),int(move_step ), int(max_deviation * st_model.user_grid), 0, 0 };
+    //find shortest path
     vector<Coord> path;
     double weight = INF;
-    g.find_path_Dijkstra({ startPoint.x, startPoint.y }, goalPoint);
-    path = g.find_path_Dijkstra({ startPoint.x, startPoint.y }, goalPoint);
+    g.find_path_Dijkstra();
+    path = g.find_path_Dijkstra();
     //    double Label = g.GetLabel(goalPoint);
     //    printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
     //    double Route_Len = g.GetRouteLen();
@@ -88,14 +88,14 @@ int main()
     if (out.is_open()) {
         out << "x_1,x_2, y,edge, label" << endl;
         for (const auto& path_coord : path)
-            out << path_coord.x << ", " << path_coord.x + road_len << ", " << path_coord.y << ", "<<path_coord.edge<<", " << g.GetLabel(path_coord) << endl;
+            out << path_coord.x << ", " << path_coord.x + road_len << ", " << 999-path_coord.y << ", "<<path_coord.edge<<", " << g.GetLabel(path_coord) << endl;
     }
-    ofstream vertex;
-    out.open("vertex.txt");
-    if (out.is_open()) {
-        for (const auto& path_coord : path)
-            out << path_coord.x << ", " << path_coord.x + road_len << ", " << path_coord.y << ", " << g.GetLabel(path_coord) << endl;
-    }
+//    ofstream vertex;
+//    out.open("vertex.txt");
+//    if (out.is_open()) {
+//        for (const auto& path_coord : path)
+//            out << path_coord.x << ", " << path_coord.x + road_len << ", " << path_coord.y << ", " << g.GetLabel(path_coord) << endl;
+//    }
 
     //  cout << "Current label: " << /*weight*/Label << endl;
     //  cout << "Straight label: " << g.GetStraightLabel(startPoint, goalPoint) << endl;

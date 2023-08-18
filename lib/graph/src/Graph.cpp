@@ -8,179 +8,54 @@
 #include <fstream>
 #include <sstream>
 #include <fstream>
-Graph::Graph(std::vector<std::vector<Vertex>>& vertices, int n, int m, int road_len, int move_step, int max_deviation, double max_weight, double max_angle) :
-    N(n), M(m), RoadLen(road_len), Move_Step(move_step), Max_Deviation(max_deviation), Max_Weight(max_weight), Max_Angle(max_angle)
+Graph::Graph(std::vector<std::vector<Vertex>>& vertices, Coord start_point, Coord goal_point, int n, int m, int road_len, int move_step, int max_deviation, double max_weight, double max_angle) :
+        Start_Point(start_point), Goal_Point(goal_point), N(n), M(m), RoadLen(road_len), Move_Step(move_step), Max_Deviation(max_deviation), Max_Weight(max_weight), Max_Angle(max_angle)
 {
-    Coord startPoint = { 100,0 };
-    Coord finishPoint = { 100,M - 1 };
-    Vertices.resize(2 * Max_Deviation * (2 * Move_Step + 1) * (M + 1) + 1);
-    std::cout << 2 * Max_Deviation * (2 * Move_Step + 1) * (M + 2) + 1 << std::endl;
-    //std::cout << std::endl;
+
+    Vertices.resize(2 * Max_Deviation * (2 * Move_Step + 1) * M +  (2*Max_Deviation-RoadLen + 1) * (2 * Move_Step + 1) + 1);
     for (auto y = 1; y < M; y++) {
-        for (auto x = -Max_Deviation + startPoint.x; x <= Max_Deviation + startPoint.x - RoadLen; x++) {
-              //std::cout << value << std::endl;
-                  //Vertices[value] = vertices[startPoint.x - Max_Deviation + x][y] + vertices[startPoint.x - Max_Deviation + x][y - 1];
-            for (int i = 0; i <= Move_Step; i++) {
+        for (auto x = -Max_Deviation + Start_Point.x; x <= Max_Deviation + Start_Point.x - RoadLen; x++) {
+            for (int i = 0; i <= 2*Move_Step; i++) {
                 Coord current_vertex = { x,y,i };
-                int current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * current_vertex.y + (2 * Move_Step + 1) * (current_vertex.x - startPoint.x + Max_Deviation) + current_vertex.edge;
-                if (current_vertex.edge == 0) {
-                    for (int idx = 0; idx <= RoadLen; idx++) {
-                        if(current_vertex.y > 0)
-                            Vertices[current_index].Weight += vertices[current_vertex.x + idx][current_vertex.y - 1].Weight;
-                        if(current_vertex.y < 999)
-                        Vertices[current_index].Weight += vertices[current_vertex.x + idx][current_vertex.y ].Weight;
-                    }
+                int current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * current_vertex.y + (2 * Move_Step + 1) * (current_vertex.x - Start_Point.x + Max_Deviation) + current_vertex.edge;
+                for(int idx = std::min(-Move_Step + i,0); idx<= std::max(RoadLen,RoadLen - Move_Step + i); idx++){
+                        Vertices[current_index].Weight += vertices[current_vertex.x + idx][current_vertex.y].Weight;
                 }
-                else {
 
-                    for (int idy = 0; idy < i; idy++) {
-                        if (y >= idy)
-                            for (int idx = -1; idx <= RoadLen; idx++) {
-
-                                Vertices[current_index ].Weight += vertices[current_vertex.x + idx][current_vertex.y - idy].Weight;
-
-                            }
-                    }
-                }
-                if (Vertices[current_index].Weight != 0)
-                    std::cout  << current_vertex.x << " " << 1000-current_vertex.y << " " << current_vertex.edge << " " << Vertices[current_index].Weight << std::endl;
-            }
-                for (int i = Move_Step + 1; i <= 2 * Move_Step; i++) {
-                    
-                    Coord current_vertex = { x,y,i };
-                    int current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * current_vertex.y + (2 * Move_Step + 1) * (current_vertex.x - startPoint.x + Max_Deviation) + current_vertex.edge;
-                        for (int idy = 0; idy < i - Move_Step; idy++) {
-                            if (y >= idy) {
-                                for (int idx = 0; idx <= RoadLen + 1; idx++) {
-                                    Vertices[current_index ].Weight += vertices[current_vertex.x + idx][current_vertex.y - idy].Weight;
-                                }
-                            }
-                    }
- 
-                    if (Vertices[current_index].Weight != 0)
-                        std::cout <<current_vertex.x<<" "<<1000- current_vertex.y<<" "<<current_vertex.edge<<" " << Vertices[current_index].Weight << std::endl;
-                }
+//                    if (Vertices[current_index].Weight != 0)
+//                        std::cout <<current_vertex.x<<" "<< current_vertex.y<<" "<<current_vertex.edge<<" " << Vertices[current_index].Weight << std::endl;
             }
         }
-
+    }
     for (int i = 0; i <= RoadLen; i++)
-        Vertices[i].Weight += vertices[startPoint.x + i][0].Weight;
-    Vertices[2 * Max_Deviation * (2 * Move_Step + 1) * 1000 + (2 * Move_Step + 1) * Max_Deviation] = vertices[finishPoint.x][finishPoint.y];
+        Vertices[i].Weight += vertices[Start_Point.x + i][0].Weight;
+
+    //Vertices[2 * Max_Deviation * (2 * Move_Step + 1) * 1000 + (2 * Move_Step + 1) * Max_Deviation]= vertices[Goal_Point.x][Goal_Point.y];
 }
 std::vector<Coord> Graph::GetValidNeighbors(Coord v) {
     std::vector<Coord> neighbours;
-    if (v.y == M - 1 && v.x == 100) {
-        neighbours.push_back({ 100,M,0 });
+    neighbours.clear();
+    if (v.y == Goal_Point.y && v.x == Goal_Point.x ) {
+        neighbours.push_back({ Goal_Point.x,Goal_Point.y + 1,0 });
         return neighbours;
     }
-    if (v.y == 0) {
-        neighbours.push_back({ v.x, v.y + 1, 0 });
-        for (int i = 1; i < Move_Step; i++) {
-            neighbours.push_back({ v.x - 1, v.y + i, i });
-        }
-        for (int i = Move_Step + 1; i <= 2 * Move_Step; i++) {
-            neighbours.push_back({ v.x + 1, v.y + i - Move_Step, i });
-        }
-    }
-    else if (v.edge == 0) {
-        neighbours.push_back({ v.x,v.y + 1, 0 });
-        if (Move_Step >= 4) {
-            for (int i = 4; i <= Move_Step; i++) 
-                neighbours.push_back({ v.x - 1, v.y + i, i });
-            for(int i = Move_Step + 4; i <= 2*Move_Step;i++)
-                neighbours.push_back({ v.x + 1, v.y + i - Move_Step, i  });
-
+    if(v.y < Goal_Point.y) {
+        for (int i = 0; i <= 2 * Move_Step; i++) {
+            double angle = ((Move_Step - v.edge) * (i - Move_Step) + N * N) /
+                           (sqrt(pow((v.edge - Move_Step), 2) + pow(N, 2)) *
+                            sqrt(pow((i - v.edge), 2) + pow(N, 2)));
+            if (abs(angle > 0.97)) {
+                neighbours.push_back({v.x - Move_Step + i, v.y + 1, i});
+            }
         }
     }
-    else if (v.edge == 1) {
-        neighbours.push_back({ v.x - 1, v.y + 1, 1 });
-        neighbours.push_back({ v.x - 1, v.y + 2, 2  });
-    }
-    else if (v.edge == Move_Step + 1) {
-        neighbours.push_back({ v.x + 1, v.y + 1, 1 + Move_Step });
-        neighbours.push_back({ v.x + 1, v.y + 2, 2 + Move_Step });
-    }
-    else if (v.edge == Move_Step) {
-        neighbours.push_back({ v.x , v.y + 1, 0 });
-        neighbours.push_back({ v.x - 1, v.y + Move_Step,  Move_Step });
-        neighbours.push_back({ v.x - 1, v.y + Move_Step - 1, Move_Step - 1 });
-        if (Move_Step >= 6) {
-            for (int i = 0; i <= Move_Step - 6; i++)
-                neighbours.push_back({ v.x + 1, v.y + Move_Step - i, 2*Move_Step - i });
-        }
-    }
-    else if (v.edge == 2 * Move_Step) {
-        neighbours.push_back({ v.x , v.y + 1, 0 });
-        neighbours.push_back({ v.x + 1, v.y + Move_Step, 2*Move_Step });
-        neighbours.push_back({ v.x + 1, v.y + Move_Step - 1, 2*Move_Step - 1 });
-        if (Move_Step >= 6) {
-            for (int i = 0; i <= Move_Step - 6; i++)
-                neighbours.push_back({ v.x - 1, v.y + Move_Step - i,  Move_Step - i });
-        }
-    }
-    else {
-        if (v.edge > Move_Step) {
-            neighbours.push_back({ v.x + 1, v.y + v.edge - Move_Step, v.edge });
-            neighbours.push_back({ v.x + 1, v.y + v.edge - Move_Step + 1, v.edge + 1 });
-            neighbours.push_back({ v.x + 1, v.y + v.edge - Move_Step - 1, v.edge - 1 });
-        }
-        else {
-            neighbours.push_back({ v.x - 1, v.y + v.edge , v.edge });
-            neighbours.push_back({ v.x - 1, v.y + v.edge + 1, v.edge + 1 });
-            neighbours.push_back({ v.x - 1, v.y + v.edge - 1, v.edge - 1 });
-        }
-
-    }
-    
     return neighbours;
 }
 
 
-//double Graph::GetWeight(Coord start, Coord finish) {
-//    double current_weight = 0;
-//    if (start != finish) {
-//        for (int j = start.y; j < finish.y; j++) {
-//            if (Vertices[std::min(start.x, finish.x)][j].Relief_Right) {
-//                for (int i = std::min(start.x, finish.x); i <= std::max(start.x, finish.x) + RoadLen; i++) {
-//                    if (Vertices[i][j].Relief_Straight && Vertices[i][j].Relief_Right) {
-//                        current_weight += Vertices[i][j].Weight;
-//                    }
-//                    else {
-//                        return INF_weight;
-//                    }
-//                }
-//            }
-//            else {
-//                //std::cout << "Right"<<std::endl;
-//                return INF_weight;
-//            }
-//        }
-//    }
-//    else {
-//        if (Vertices[start.x][start.y].Relief_Right) {
-//            for (int i = start.x; i <= start.x + RoadLen; i++) {
-//                if (Vertices[i][start.y].Relief_Straight) {
-//                    current_weight += Vertices[i][start.y].Weight;
-//                }
-//                else {
-//                    return INF_weight;
-//                }
-//            }
-//        }
-//        else {
-//            return INF_weight;
-//        }
-//    }
-//    return current_weight;
-//}
-
-//double Graph::GetRoute(Coord move, Coord dest) {
-//    if (Vertices[move.x][move.y].CameFrom.x != INF)
-//        return 10*pow(abs(move.x - Vertices[move.x][move.y].CameFrom.x),2);
-//    else {
-//        return abs(move.x - dest.x);
-//    }
-//}
+double Graph::GetRoute(Coord move, Coord dest) {
+        return abs(move.x - dest.x)/10;
+}
 //
 //double Graph::GetDistance(Coord start, Coord finish) {
 //    Coord current_vertex = start;
@@ -209,8 +84,8 @@ std::vector<Coord> Graph::ConvertGraphToPath(Coord goalPoint)
     std::vector<Coord> result;
     result.clear();
     std::stack<Coord> tmp_path;
+    unsigned int current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * goalPoint.y + (2 * Move_Step + 1) * (goalPoint.x - Start_Point.x + Max_Deviation);
     Coord current_vertex = goalPoint;
-    unsigned int current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * 1000 + (2 * Move_Step + 1) * Max_Deviation;
     Coord end = { INF,INF };
     //    for (int i = 0; i <= 3; i++) {
     //        for (int j = 0; j <= RoadLen; j++) {
@@ -218,14 +93,12 @@ std::vector<Coord> Graph::ConvertGraphToPath(Coord goalPoint)
     //        }
     //    }
       //  route_len += pow(current_vertex.x - Vertices[current_vertex.x][current_vertex.y].CameFrom.x, 2) + pow(current_vertex.y - Vertices[current_vertex.x][current_vertex.y].CameFrom.y, 2);
-    while (current_vertex.y > 0)
+    while (current_vertex.y > 0 && current_vertex !=end)
     {
 
         tmp_path.push(current_vertex);
+        current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * current_vertex.y + (2 * Move_Step + 1) * (current_vertex.x - Start_Point.x + Max_Deviation) + current_vertex.edge;
         current_vertex = Vertices[current_index].CameFrom;
-        
-        current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * current_vertex.y + (2 * Move_Step + 1) * (current_vertex.x - 100 + Max_Deviation) + current_vertex.edge;
-        //std::cout <<current_vertex.x<<" "<<current_vertex.y<<" "<<current_vertex.edge<<" "<< Vertices[current_index].Weight << " " << Vertices[current_index].Label << std::endl;
         if (Vertices[current_index].CameFrom != end) {
             int y = current_vertex.y - Vertices[current_index].CameFrom.y;
             int x = current_vertex.x - Vertices[current_index].CameFrom.x;
@@ -263,42 +136,48 @@ std::vector<Coord> Graph::ConvertGraphToPath(Coord goalPoint)
 
     return result;
 }
-std::vector<Coord>Graph::find_path_Dijkstra(Coord startPoint, Coord goalPoint, Coord CameFrom)
+std::vector<Coord>Graph::find_path_Dijkstra(Coord CameFrom)
 {
 
     //сортировка по весу, результат - значение
     std::multimap<double, Coord> min_weigth_map;
     // Vertices[startPoint.x][startPoint.y].Weight = GetWeight(startPoint, startPoint);
-    int start_index = (2 * Move_Step + 1) * Max_Deviation;
+    int start_index = (2 * Move_Step + 1) * Max_Deviation + Move_Step;
     Vertices[start_index].Label = Vertices[start_index].Weight;// (startPoint, startPoint);
     Vertices[start_index].CameFrom = CameFrom;
-    unsigned int goal_index = 2 * Max_Deviation * (2 * Move_Step + 1) * 1000 + (2 * Move_Step + 1) * Max_Deviation;
+    unsigned int goal_index = 2 * Max_Deviation * (2 * Move_Step + 1) * M + (2 * Move_Step + 1) * (Goal_Point.x - Start_Point.x + Max_Deviation);
   // std::cout << goal_index << std::endl;
-    min_weigth_map.insert({ 0,startPoint });
+    min_weigth_map.insert({ 0,Start_Point });
     while (!min_weigth_map.empty() && !Vertices[goal_index].IsVisited)
     {
         auto [current_weight, current_coord] = *(min_weigth_map.begin()); //минимальное значение
         min_weigth_map.erase(min_weigth_map.begin());
-        unsigned int current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * current_coord.y + (2 * Move_Step + 1) * (100-current_coord.x +Max_Deviation) + current_coord.edge;
+        unsigned int current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * current_coord.y + (2 * Move_Step + 1) * (Start_Point.x - current_coord.x + Max_Deviation) + current_coord.edge;
         if (Vertices[current_index].IsVisited)
         {
             continue;
         }
         Vertices[current_index].IsVisited = true;
-        std::vector<Coord> all_neighbors;
         auto neighbors = GetValidNeighbors(current_coord);
-        for (auto neighbor : GetValidNeighbors(current_coord))
+        if(neighbors.size() == 0) continue;
+        if(current_coord.y == 1000){
+            std::cout <<"problem";
+        }
+        for (auto neighbor : neighbors)
         {
-            int neighbor_index = 2 * Max_Deviation * (2 * Move_Step + 1) * neighbor.y + (2 * Move_Step + 1) * (neighbor.x - startPoint.x + Max_Deviation) + neighbor.edge;
-            if (neighbor.x < startPoint.x - Max_Deviation || neighbor.x > startPoint.x - RoadLen +  Max_Deviation || neighbor.x < startPoint.x  || neighbor.y < 0 || neighbor.x >= /*N - RoadLen*/ /*startPoint.x + Max_Deviation - RoadLen ||*/ neighbor.y > M - 1 || neighbor_index > goal_index || neighbor_index < 0) continue;
+            int neighbor_index = 2 * Max_Deviation * (2 * Move_Step + 1) * neighbor.y + (2 * Move_Step + 1) * (neighbor.x - Start_Point.x + Max_Deviation) + neighbor.edge;
+            if (neighbor.x < Start_Point.x - Max_Deviation || neighbor.x > Start_Point.x - RoadLen +  Max_Deviation || neighbor.y > M || neighbor.y < 0 || neighbor_index > goal_index || neighbor_index < 0) continue;
+//            if(neighbor.y == 1000){
+//                std::cout <<"problem";
+//            }
             if (!Vertices[neighbor_index].IsVisited)
             {
 
-               
-                double next_label = current_weight + Vertices[neighbor_index].Weight;// GetWeight(current_coord, neighbor) + GetDistance(current_coord, neighbor) +GetRoute(neighbor, goalPoint);
+
+                double next_label = current_weight + Vertices[neighbor_index].Weight;// + GetRoute(neighbor, Start_Point);// GetWeight(current_coord, neighbor) + GetDistance(current_coord, neighbor) +GetRoute(neighbor, goalPoint);
                 if (next_label < Vertices[neighbor_index].Label)
                 {
-                   // std::cout << "x: " << neighbor.x << " y: " << neighbor.y << " edge: " << neighbor.edge << std::endl;
+                    //std::cout << "x: " << neighbor.x << " y: " << neighbor.y << " edge: " << neighbor.edge << std::endl;
                    // std::cout << next_label << " " << neighbor_index << std::endl;
                     Vertices[neighbor_index].Label = next_label;
                     Vertices[neighbor_index].CameFrom = current_coord;
@@ -309,13 +188,14 @@ std::vector<Coord>Graph::find_path_Dijkstra(Coord startPoint, Coord goalPoint, C
         }
     }
     //    Vertices.back().Label += Vertices.back().Weight;//GetWeight(goalPoint, goalPoint);
-    //    std::cout << Vertices.back().Label << std::endl;
-    std::cout << Vertices[goal_index].Label << std::endl;;
+        std::cout << Vertices[goal_index].CameFrom.y << std::endl;
+    std::cout << Vertices[goal_index].Label << std::endl;
+
     return ConvertGraphToPath(Vertices[goal_index].CameFrom);
 }
 double Graph::GetLabel(Coord c)
 {
-    unsigned int current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * c.y + (2 * Move_Step + 1) * (c.x - 100 + Max_Deviation) + c.edge ;
+    unsigned int current_index = 2 * Max_Deviation * (2 * Move_Step + 1) * c.y + (2 * Move_Step + 1) * (c.x - Start_Point.x + Max_Deviation) + c.edge ;
     return Vertices[current_index].Label;
 }
 //

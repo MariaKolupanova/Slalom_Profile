@@ -72,7 +72,7 @@ struct ShapeTiffGridSettings
     int cellHeight;
     int cellWidth;
     BoundaryBox boundaryBox;
-    double user_grid = 1;
+    double user_grid = 10;
 };
 
 

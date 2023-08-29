@@ -52,8 +52,8 @@ int main()
 
     // choose start and finish point
 
-    Coord startPoint = { 860, 0, move_step };
-    Coord goalPoint = { startPoint.x, M-1 };
+    Coord startPoint = { 860, 0, -1 };
+    Coord goalPoint = { startPoint.x, M };
     int max_deviation = 10;
     Coord routStart = startPoint;
     Coord routFinish = goalPoint;
@@ -65,7 +65,7 @@ int main()
     vector<Coord> path;
     double weight = INF;
     path = g.find_path_Dijkstra();
-    double Label = g.GetLabel({goalPoint.x,M,0});
+    double Label = g.GetLabel({goalPoint.x,M+1,0});
     //    printf("Time taken: %.2fs\n", (double)(clock() - tStart) / CLOCKS_PER_SEC);
     double Route_Len = g.GetRouteLen();
     vector<int> Categories = g.GetCategories();

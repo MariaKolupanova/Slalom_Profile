@@ -10,12 +10,13 @@ Graph::Graph(std::vector<std::vector<Vertex>>& vertices, Coord start_point, Coor
         Start_Point(start_point), Goal_Point(goal_point), N(n), M(m), RoadLen(road_len), Move_Step(move_step), Max_Deviation(max_deviation), Max_Weight(max_weight), Max_Angle(max_angle)
 {
 int param = 0;
-    Vertices.resize(2 * Max_Deviation * (2 * Move_Step + 1) * M +  (2*Max_Deviation-RoadLen + 1) * (2 * Move_Step + 1) + 1);
-    for (auto y = 0; y < M; y++) {
+    Vertices.resize(2 * Max_Deviation * (2 * Move_Step + 1) * (M+1) +  (2*Max_Deviation-RoadLen + 1) * (2 * Move_Step + 1) + 1);
+    for (auto y = 0; y <= M; y++) {
         for (auto x = -Max_Deviation + Start_Point.x; x <= Max_Deviation + Start_Point.x - RoadLen; x++) {
             for (int i = 0; i <= 2*Move_Step; i++) {
                 Coord current_vertex = { x,y,i };
                 int current_index = GetIndex(current_vertex);
+
                 for(int idx = std::min(-Move_Step + i,0); idx<= std::max(RoadLen,RoadLen - Move_Step + i); idx++){
                     Vertices[current_index].Weight += vertices[current_vertex.x + idx][current_vertex.y].Weight;
                     for(int thck = 0; thck <=3; thck ++){
@@ -34,17 +35,16 @@ int param = 0;
 }
 
 unsigned int Graph::GetIndex(Coord v){
-    return 2 * Max_Deviation * (2 * Move_Step + 1) * v.y + (2 * Move_Step + 1) * (v.x - Start_Point.x + Max_Deviation) + v.edge ;
+    return 2 * Max_Deviation * (2 * Move_Step + 1) * v.y + (2 * Move_Step + 1) * (v.x - Start_Point.x + Max_Deviation) + v.edge;
 }
 std::vector<Coord> Graph::GetValidNeighbors(Coord v) {
     std::vector<Coord> neighbours;
     neighbours.clear();
-    if(v.y == Start_Point.y && v.x == Start_Point.x){
-        for (int i = 0; i <= 2 * Move_Step; i++) {
-            neighbours.push_back({v.x - Move_Step + i, v.y + 1, i});
-        }
-        return neighbours;
+    if(v == Start_Point){
+        for (int i = 0; i <= 2 * Move_Step; i++)
+            neighbours.push_back({v.x, v.y, i});
     }
+
     if (v.y == Goal_Point.y && v.x == Goal_Point.x ) {
         neighbours.push_back({ Goal_Point.x,Goal_Point.y + 1,0 });
         return neighbours;
@@ -64,7 +64,7 @@ std::vector<Coord> Graph::GetValidNeighbors(Coord v) {
 
 
 double Graph::GetRoute(Coord move, Coord dest) {
-        return abs(move.x - dest.x)/10;
+        return abs(move.x - dest.x)/N;
 }
 
 std::vector<Coord> Graph::ConvertGraphToPath(Coord goalPoint)
@@ -78,8 +78,7 @@ std::vector<Coord> Graph::ConvertGraphToPath(Coord goalPoint)
     unsigned int current_index = GetIndex(goalPoint);
     Coord current_vertex = goalPoint;
     Coord end = { INF,INF };
-    ShapeTiffGridSettings st_model;
-    route_len += pow((current_vertex.x - Vertices[current_index].CameFrom.x)/st_model.user_grid, 2) + pow(current_vertex.y - Vertices[current_index].CameFrom.y, 2);
+    route_len += pow((current_vertex.x - Vertices[current_index].CameFrom.x)/N, 2) + pow(current_vertex.y - Vertices[current_index].CameFrom.y, 2);
     while (current_vertex.y > 0 && current_vertex !=end)
     {
         tmp_path.push(current_vertex);
@@ -87,7 +86,7 @@ std::vector<Coord> Graph::ConvertGraphToPath(Coord goalPoint)
         current_vertex = Vertices[current_index].CameFrom;
 
         if (Vertices[current_index].CameFrom != end) {
-            double x = (current_vertex.x - Vertices[current_index].CameFrom.x)/st_model.user_grid;
+            double x = (current_vertex.x - Vertices[current_index].CameFrom.x)/N;
             route_len += sqrt(abs(x * x) + 1);
             if(Vertices[current_index].Weight != 0){
                 std::cout <<Vertices[current_index].Weight<<" "<<current_vertex.y<<std::endl;
@@ -96,7 +95,7 @@ std::vector<Coord> Graph::ConvertGraphToPath(Coord goalPoint)
             }
         }
     }
-    std::cout <<Vertices[GetIndex(Start_Point)].Weight<<" "<<current_vertex.y<<std::endl;
+//    std::cout <<Vertices[GetIndex(Start_Point)].Weight<<" "<<current_vertex.y<<std::endl;
      for (int i = 0; i <= 3; i++) {
              TotCategories[i] += Vertices[GetIndex(Start_Point)].Categories[i];
      }
@@ -118,8 +117,9 @@ std::vector<Coord>Graph::find_path_Dijkstra(Coord CameFrom)
     std::cout << start_index<<std::endl;
     Vertices[start_index].Label = Vertices[start_index].Weight;
     Vertices[start_index].CameFrom = CameFrom;
-    unsigned int goal_index = GetIndex({Goal_Point.x,M,0});
-    min_weigth_map.insert({ Vertices[start_index].Label,Start_Point });
+    std::cout << Goal_Point.y<<std::endl;
+    unsigned int goal_index = GetIndex({Goal_Point.x,Goal_Point.y+1,0});
+    min_weigth_map.insert({ 0,Start_Point });
     while (!min_weigth_map.empty() && !Vertices[goal_index].IsVisited)
     {
         auto [current_weight, current_coord] = *(min_weigth_map.begin()); //минимальное значение
@@ -135,8 +135,7 @@ std::vector<Coord>Graph::find_path_Dijkstra(Coord CameFrom)
         for (auto neighbor : neighbors)
         {
             int neighbor_index = GetIndex(neighbor);
-            if (neighbor.x < Start_Point.x - Max_Deviation || neighbor.x > Start_Point.x - RoadLen +  Max_Deviation || neighbor.y > M || neighbor.y < 0 || neighbor_index > goal_index || neighbor_index < 0) continue;
-
+            if (neighbor.x < Start_Point.x - Max_Deviation || neighbor.x > Start_Point.x - RoadLen +  Max_Deviation || neighbor.y > M + 1 || neighbor.y < 0 || neighbor_index > goal_index || neighbor_index < 0) continue;
             if (!Vertices[neighbor_index].IsVisited)
             {
 
@@ -153,6 +152,7 @@ std::vector<Coord>Graph::find_path_Dijkstra(Coord CameFrom)
             }
         }
     }
+//    std::cout << Vertices[goal_index].CameFrom.x<< " "<<Vertices[goal_index].CameFrom.y<<std::endl;
     return ConvertGraphToPath(Vertices[goal_index].CameFrom);
 }
 double Graph::GetLabel(Coord c)

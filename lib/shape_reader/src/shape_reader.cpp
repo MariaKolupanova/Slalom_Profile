@@ -52,23 +52,23 @@ namespace shape_reader
         const int N = int(readSettings.user_grid * ceil((it_x.second->x - it_x.first->x)) + 1);
         const int M = ceil((it_y.second->y - it_y.first->y)) + 1;
         readSettings = { M,N,{it_x.first->x,it_x.second->x,it_y.first->y,it_y.second->y} };
-        Vertices.resize(N, std::vector<Vertex>(M));
+        Vertices.resize(N, std::vector<Vertex>(M+1));
         // std::cout << N<<" "<<M<<std::endl;
         for (auto tr : trees) {
-             Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))),  int(floor( (tr.y - it_y.first->y))) };
-             if(pos.x >=0 && pos.x < N && M-1-pos.y >=0 && M-pos.y < M ){
-             Vertices[pos.x][M-pos.y ].Weight = +GetWeight(tr.thck);
-             if (tr.thck > 40) Vertices[pos.x][M-pos.y].Categories[3] += 1;
-             else  Vertices[pos.x][M-pos.y].Categories[floor(tr.thck / 10)] += 1;
-             if (Vertices[pos.x][M-pos.y].Weight > max_weight) max_weight = Vertices[pos.x][M-pos.y].Weight;
-             }
+//             Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))),  int(floor( (tr.y - it_y.first->y))) };
+//             if(pos.x >=0 && pos.x < N && M-pos.y >=0 && M-pos.y <= M ){
+//                Vertices[pos.x][M-pos.y ].Weight = +GetWeight(tr.thck);
+//                if (tr.thck > 40) Vertices[pos.x][M-pos.y].Categories[3] += 1;
+//                else  Vertices[pos.x][M-pos.y].Categories[floor(tr.thck / 10)] += 1;
+//                if (Vertices[pos.x][M-pos.y].Weight > max_weight) max_weight = Vertices[pos.x][M-pos.y].Weight;
+//             }
 
-//            Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))), int(floor( (tr.y - it_y.first->y))) };
-//            // std::cout << pos.x<<" "<<pos.y<<std::endl;
-//            Vertices[pos.x][pos.y].Weight = +GetWeight(tr.thck);
-//            if (tr.thck > 40) Vertices[pos.x][pos.y].Categories[3] += 1;
-//            else  Vertices[pos.x][pos.y].Categories[floor(tr.thck / 10)] += 1;
-//            if (Vertices[pos.x][pos.y].Weight > max_weight) max_weight = Vertices[pos.x][pos.y].Weight;
+            Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))), int(floor( (tr.y - it_y.first->y))) };
+            // std::cout << pos.x<<" "<<pos.y<<std::endl;
+            Vertices[pos.x][pos.y].Weight = +GetWeight(tr.thck);
+            if (tr.thck > 40) Vertices[pos.x][pos.y].Categories[3] += 1;
+            else  Vertices[pos.x][pos.y].Categories[floor(tr.thck / 10)] += 1;
+            if (Vertices[pos.x][pos.y].Weight > max_weight) max_weight = Vertices[pos.x][pos.y].Weight;
         }
         for (int i = 0; i < Vertices.size(); i++) {
             for (int j = 0; j < Vertices[0].size(); j++) {

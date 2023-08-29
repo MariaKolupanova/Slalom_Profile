@@ -55,20 +55,20 @@ namespace shape_reader
         Vertices.resize(N, std::vector<Vertex>(M));
         // std::cout << N<<" "<<M<<std::endl;
         for (auto tr : trees) {
-//             Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))),  int(floor( (tr.y - it_y.first->y))) };
-//             if(pos.x >=0 && pos.x < N && M-1-pos.y >=0 && M-pos.y < M ){
-//             Vertices[pos.x][M-pos.y ].Weight = +GetWeight(tr.thck);
-//             if (tr.thck > 40) Vertices[pos.x][M-pos.y].Categories[3] += 1;
-//             else  Vertices[pos.x][M-pos.y].Categories[floor(tr.thck / 10)] += 1;
-//             if (Vertices[pos.x][M-pos.y].Weight > max_weight) max_weight = Vertices[pos.x][M-pos.y].Weight;
-//             }
+             Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))),  int(floor( (tr.y - it_y.first->y))) };
+             if(pos.x >=0 && pos.x < N && M-1-pos.y >=0 && M-pos.y < M ){
+             Vertices[pos.x][M-pos.y ].Weight = +GetWeight(tr.thck);
+             if (tr.thck > 40) Vertices[pos.x][M-pos.y].Categories[3] += 1;
+             else  Vertices[pos.x][M-pos.y].Categories[floor(tr.thck / 10)] += 1;
+             if (Vertices[pos.x][M-pos.y].Weight > max_weight) max_weight = Vertices[pos.x][M-pos.y].Weight;
+             }
 
-            Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))), int(floor( (tr.y - it_y.first->y))) };
-            // std::cout << pos.x<<" "<<pos.y<<std::endl;
-            Vertices[pos.x][pos.y].Weight = +GetWeight(tr.thck);
-            if (tr.thck > 40) Vertices[pos.x][pos.y].Categories[3] += 1;
-            else  Vertices[pos.x][pos.y].Categories[floor(tr.thck / 10)] += 1;
-            if (Vertices[pos.x][pos.y].Weight > max_weight) max_weight = Vertices[pos.x][pos.y].Weight;
+//            Coord pos = { int(floor(readSettings.user_grid * (tr.x - it_x.first->x))), int(floor( (tr.y - it_y.first->y))) };
+//            // std::cout << pos.x<<" "<<pos.y<<std::endl;
+//            Vertices[pos.x][pos.y].Weight = +GetWeight(tr.thck);
+//            if (tr.thck > 40) Vertices[pos.x][pos.y].Categories[3] += 1;
+//            else  Vertices[pos.x][pos.y].Categories[floor(tr.thck / 10)] += 1;
+//            if (Vertices[pos.x][pos.y].Weight > max_weight) max_weight = Vertices[pos.x][pos.y].Weight;
         }
         for (int i = 0; i < Vertices.size(); i++) {
             for (int j = 0; j < Vertices[0].size(); j++) {
@@ -89,9 +89,9 @@ namespace shape_reader
         std::cout << "reading shape file done" << std::endl;
     }
     double ShapeReader::GetWeight(double thck) {
-        //if (thck >= 30) return 1000;
-        //if (thck >= 20) return 100;
-        //if (thck >= 10) return 20;
+//        if (thck >= 30) return 1000;
+//        if (thck >= 20) return 100;
+//        if (thck >= 10) return 20;
         return thck;
     }
 

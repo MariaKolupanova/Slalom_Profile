@@ -23,11 +23,12 @@ public:
     std::vector<Coord> ConvertGraphToPath(Coord goalPoint);
     //double GetWeight(Coord start, Coord end);
     //double GetDistance(Coord start, Coord end);
+    unsigned int GetIndex(Coord v);
     double GetRoute(Coord move, Coord dest);
     double GetLabel(Coord c);
-    //double GetStraightLabel(Coord start, Coord end);
-    //std::vector<int> GetCategories() { return TotCategories; }
-    //double GetRouteLen() { return (route_len + 1) / (Vertices.size() - 1); }
+    double GetStraightLabel(Coord start, Coord end);
+    std::vector<int> GetCategories() { return TotCategories; }
+    double GetRouteLen() { return route_len / (M - 1); }
     ~Graph() = default;
 private:
     // Количество вершин по оси Ox
@@ -43,7 +44,6 @@ private:
     std::vector<Vertex> Vertices;
     std::vector<int> TotCategories = { 0,0,0,0 };
     double route_len = 0;
-    //std::vector<std::pair<Coord,Coord>> c;
 };
 
 #endif /* Graph_h */
